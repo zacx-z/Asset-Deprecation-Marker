@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEditor;
 using UnityEditor.Search;
 using UnityEngine;
@@ -10,7 +11,7 @@ namespace Nela {
             return new AssetDeprecationMarkerSettingsDrawer();
         }
 
-        private static IList<SearchItem> _searchList;
+        private static IList<Object> _searchList;
         private static Vector2 _scrollPosition;
         private static int _selectedIndex = -1;
 
@@ -39,33 +40,27 @@ namespace Nela {
 
             using (new GUILayout.HorizontalScope()) {
                 if (GUILayout.Button(_searchList == null ? "List All Deprecated" : "Refresh", EditorStyles.miniButton)) {
-                    SearchService.Request("l:Deprecated", OnSearchCompleted);
+                    _searchList = AssetDatabase.FindAssets("l:Deprecated").Select(guid => {
+                        return AssetDatabase.LoadAssetAtPath<Object>(AssetDatabase.GUIDToAssetPath(guid));
+                    }).ToList();
                 }
                 GUILayout.FlexibleSpace();
             }
 
             if (_searchList != null) {
                 GUILayout.BeginScrollView(_scrollPosition, GUI.skin.box, GUILayout.MinHeight(160));
-                _selectedIndex = ListView.Draw(_searchList, _selectedIndex, i => {
-                    var o = i.ToObject();
-                    return EditorGUIUtility.ObjectContent(o, o.GetType());
-                });
+                _selectedIndex = ListView.Draw(_searchList, _selectedIndex, o => EditorGUIUtility.ObjectContent(o, o.GetType()));
                 GUILayout.EndScrollView();
 
                 if (_selectedIndex != -1) {
                     if (Event.current.type == EventType.MouseDown) {
                         if (Event.current.clickCount == 2) {
-                            EditorGUIUtility.PingObject(_searchList[_selectedIndex].ToObject());
+                            EditorGUIUtility.PingObject(_searchList[_selectedIndex]);
                             Event.current.Use();
                         }
                     }
                 }
             }
-        }
-
-        private void OnSearchCompleted(SearchContext context, IList<SearchItem> list) {
-            _searchList = list;
-            Repaint();
         }
     }
 }
