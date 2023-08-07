@@ -10,5 +10,7 @@ namespace Nela {
         {
             fontSize = 12
         };
+
+        public static Color HighlightedColor = new Color(0.238f, 0.328f, 0.527f);
     }
 }
