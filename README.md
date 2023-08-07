@@ -10,6 +10,7 @@ Instead of moving deprecated asset files to a specific location, which can cause
 
 + Display strike through on assets labeled as "Deprecated" in the Project window.
 + Display strike through on deprecated prefab instances in the Hierarchy window.
++ Enable nested deprecation to display assets under any deprecated folders as deprecated.
 
 ## How To Use
 
@@ -20,3 +21,10 @@ To mark an asset as deprecated or clear the flag, right click the asset and sele
 ### Find Deprecated Assets
 
 To find all deprecated assets, search for `l:Deprecated` in the Project window.
+
+Alternatively, all deprecated files can be listed in the settings window.
+
+### Settings
+
+To change the settings, go to `Edit/Project Settings...` and navigate to `Packages/Asset Deprecation Marker`. In this settings window, you can enable Nested Deprecation.
+
