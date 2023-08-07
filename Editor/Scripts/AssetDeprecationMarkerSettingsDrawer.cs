@@ -16,7 +16,8 @@ namespace Nela {
             so.Update();
 
             EditorGUI.indentLevel++;
-            EditorGUILayout.PropertyField(so.FindProperty("_enabled"));
+            EditorGUILayout.PropertyField(so.FindProperty("_enable"));
+            EditorGUILayout.PropertyField(so.FindProperty("_enableNestedDeprecation"));
             EditorGUI.indentLevel--;
 
             if (GUI.changed) {

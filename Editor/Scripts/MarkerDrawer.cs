@@ -49,6 +49,27 @@ namespace Nela {
         }
 
         public static bool IsAssetDeprecated(GUID guid) {
+            if (IsAssetDeprecatedSelf(guid)) {
+                return true;
+            }
+
+            if (AssetDeprecationMarkerSettings.EnableNestedDeprecation) {
+                var path = AssetDatabase.GUIDToAssetPath(guid);
+                if (string.IsNullOrEmpty(path)) return false;
+
+                path = Path.GetDirectoryName(path);
+                while (!string.IsNullOrEmpty(path)) {
+                    if (IsAssetDeprecatedSelf(AssetDatabase.GUIDFromAssetPath(path))) {
+                        return true;
+                    }
+                    path = Path.GetDirectoryName(path);
+                }
+            }
+
+            return false;
+        }
+
+        private static bool IsAssetDeprecatedSelf(GUID guid) {
             var labels = AssetDatabase.GetLabels(guid);
             return labels.Contains("Deprecated") || labels.Contains("Obsolete");
         }
@@ -58,7 +79,7 @@ namespace Nela {
 
             float labelHeight = 12;
             if (itemRect.width > itemRect.height) {
-                itemRect.xMin += itemRect.height + 5;
+                itemRect.xMin += 20;
                 labelHeight = 14;
             }
 
