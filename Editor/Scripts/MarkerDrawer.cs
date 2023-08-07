@@ -7,8 +7,24 @@ namespace Nela {
     [InitializeOnLoad]
     public static class MarkerDrawer {
         static MarkerDrawer() {
-            EditorApplication.projectWindowItemOnGUI += OnProjectWindowItemOnGUI;
-            EditorApplication.hierarchyWindowItemOnGUI += OnHierarchyWindowItemOnGUI;
+            if (AssetDeprecationMarkerSettings.Enabled)
+                SetEnabled(true);
+        }
+
+        private static bool _enabled = false;
+
+        public static void SetEnabled(bool enabled) {
+            if (enabled == _enabled) return;
+            if (enabled) {
+                EditorApplication.projectWindowItemOnGUI += OnProjectWindowItemOnGUI;
+                EditorApplication.hierarchyWindowItemOnGUI += OnHierarchyWindowItemOnGUI;
+            } else {
+                EditorApplication.projectWindowItemOnGUI -= OnProjectWindowItemOnGUI;
+                EditorApplication.hierarchyWindowItemOnGUI -= OnHierarchyWindowItemOnGUI;
+            }
+            _enabled = enabled;
+            EditorApplication.RepaintHierarchyWindow();
+            EditorApplication.RepaintProjectWindow();
         }
 
         private static void OnProjectWindowItemOnGUI(string guid, Rect selectionRect) {
@@ -32,7 +48,7 @@ namespace Nela {
             }
         }
 
-        private static bool IsAssetDeprecated(GUID guid) {
+        public static bool IsAssetDeprecated(GUID guid) {
             var labels = AssetDatabase.GetLabels(guid);
             return labels.Contains("Deprecated") || labels.Contains("Obsolete");
         }
