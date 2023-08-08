@@ -28,10 +28,10 @@ namespace Nela {
         }
 
         private static void OnProjectWindowItemOnGUI(string guid, Rect selectionRect) {
-            if (IsAssetDeprecated(new GUID(guid))) {
+            if (AssetDeprecation.IsAssetDeprecated(new GUID(guid), out var type)) {
                 var rect = GetProjectItemNamePosition(selectionRect, Path.GetFileNameWithoutExtension(AssetDatabase.GUIDToAssetPath(guid)));
                 var strikeThroughRect = new Rect(rect.x, rect.y + rect.height / 2 - 1, rect.width, 2);
-                EditorGUI.DrawRect(strikeThroughRect, MarkerStyles.StrikethroughColor);
+                EditorGUI.DrawRect(strikeThroughRect, MarkerStyles.StrikethroughColor * MarkerStyles.GetColor(type));
             }
         }
 
@@ -40,38 +40,12 @@ namespace Nela {
             if (go == null) return;
             if (PrefabUtility.IsPartOfPrefabInstance(go)) {
                 var prefabPath = PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(go);
-                if (IsAssetDeprecated(AssetDatabase.GUIDFromAssetPath(prefabPath))) {
+                if (AssetDeprecation.IsAssetDeprecated(AssetDatabase.GUIDFromAssetPath(prefabPath), out var type)) {
                     var rect = GetHierarchyItemNamePosition(selectionRect, go);
                     var strikeThroughRect = new Rect(rect.x, rect.y + rect.height / 2 - 1, rect.width, 2);
-                    EditorGUI.DrawRect(strikeThroughRect, MarkerStyles.PrefabStrikethroughColor);
+                    EditorGUI.DrawRect(strikeThroughRect, MarkerStyles.PrefabStrikethroughColor * MarkerStyles.GetColor(type));
                 }
             }
-        }
-
-        public static bool IsAssetDeprecated(GUID guid) {
-            if (IsAssetDeprecatedSelf(guid)) {
-                return true;
-            }
-
-            if (AssetDeprecationMarkerSettings.EnableNestedDeprecation) {
-                var path = AssetDatabase.GUIDToAssetPath(guid);
-                if (string.IsNullOrEmpty(path)) return false;
-
-                path = Path.GetDirectoryName(path);
-                while (!string.IsNullOrEmpty(path)) {
-                    if (IsAssetDeprecatedSelf(AssetDatabase.GUIDFromAssetPath(path))) {
-                        return true;
-                    }
-                    path = Path.GetDirectoryName(path);
-                }
-            }
-
-            return false;
-        }
-
-        private static bool IsAssetDeprecatedSelf(GUID guid) {
-            var labels = AssetDatabase.GetLabels(guid);
-            return labels.Contains("Deprecated") || labels.Contains("Obsolete");
         }
 
         private static Rect GetProjectItemNamePosition(Rect itemRect, string name) {

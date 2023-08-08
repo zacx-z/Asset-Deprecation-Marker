@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
-using UnityEditor.Search;
 using UnityEngine;
 
 namespace Nela {
@@ -11,7 +10,9 @@ namespace Nela {
             return new AssetDeprecationMarkerSettingsDrawer();
         }
 
-        private static IList<Object> _searchList;
+        private List<Object> _searchList;
+
+        private AssetDeprecation.DeprecationType _currentDeprecationTypeDisplayed = AssetDeprecation.DeprecationType.None;
         private static Vector2 _scrollPosition;
         private static int _selectedIndex = -1;
 
@@ -28,6 +29,8 @@ namespace Nela {
             EditorGUIUtility.labelWidth = 200;
             EditorGUILayout.PropertyField(so.FindProperty("_enable"));
             EditorGUILayout.PropertyField(so.FindProperty("_enableNestedDeprecation"));
+            EditorGUILayout.PropertyField(so.FindProperty("_deprecatedColor"));
+            EditorGUILayout.PropertyField(so.FindProperty("_obsoleteColor"));
             EditorGUIUtility.labelWidth = originalLabelWidth;
             EditorGUI.indentLevel--;
 
@@ -39,8 +42,14 @@ namespace Nela {
             GUILayout.Space(EditorGUIUtility.singleLineHeight);
 
             using (new GUILayout.HorizontalScope()) {
-                if (GUILayout.Button(_searchList == null ? "List All Deprecated" : "Refresh", EditorStyles.miniButton)) {
-                    _searchList = AssetDatabase.FindAssets("l:Deprecated").Select(guid => {
+                if (GUILayout.Button(_currentDeprecationTypeDisplayed != AssetDeprecation.DeprecationType.Deprecated ? "List All Deprecated" : "Refresh", EditorStyles.miniButton)) {
+                    _searchList = AssetDatabase.FindAssets($"l:{AssetDeprecation.DeprecatedLabel}").Select(guid => {
+                        return AssetDatabase.LoadAssetAtPath<Object>(AssetDatabase.GUIDToAssetPath(guid));
+                    }).ToList();
+                }
+
+                if (GUILayout.Button(_currentDeprecationTypeDisplayed != AssetDeprecation.DeprecationType.Obsolete ? "List All Obsolete" : "Refresh", EditorStyles.miniButton)) {
+                    _searchList = AssetDatabase.FindAssets($"l:{AssetDeprecation.ObsoleteLabel}").Select(guid => {
                         return AssetDatabase.LoadAssetAtPath<Object>(AssetDatabase.GUIDToAssetPath(guid));
                     }).ToList();
                 }

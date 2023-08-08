@@ -12,5 +12,11 @@ namespace Nela {
         };
 
         public static Color HighlightedColor = new Color(0.238f, 0.328f, 0.527f);
+
+        public static Color GetColor(AssetDeprecation.DeprecationType deprecationType) {
+            return deprecationType == AssetDeprecation.DeprecationType.Deprecated
+                ? AssetDeprecationMarkerSettings.DeprecatedColor
+                : AssetDeprecationMarkerSettings.ObsoleteColor;
+        }
     }
 }
