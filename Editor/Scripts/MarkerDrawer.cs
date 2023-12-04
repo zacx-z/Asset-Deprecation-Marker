@@ -63,7 +63,12 @@ namespace Nela {
 
             if (itemRect.width < itemRect.height) {
                 rc.x = rc.x + rc.width / 2 - labelWidth / 2;
+            } else {
+                if (UnityEditor.VersionControl.Provider.isActive) {
+                    rc.x += 14;
+                }
             }
+
             rc.width = labelWidth;
 
             return rc;
